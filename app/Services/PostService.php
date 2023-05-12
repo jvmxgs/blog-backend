@@ -3,13 +3,14 @@
 namespace App\Services;
 
 use App\Models\Post;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 
 class PostService
 {
     private static $slugRetry = 1;
 
-    public static function create($data): Post
+    public static function create($data): array
     {
         $data['slug'] = static::createUniqueSlug($data['title']);
 
@@ -21,16 +22,26 @@ class PostService
             $post->tags()->attach($tags);
         }
 
-        return $post;
+        return $post->toArray();
     }
 
-    public static function update($postId, $data): Post
+    public static function update($postId, $data): array
     {
         $post = Post::find($postId);
 
+        if (!$post) {
+            return ['error' => 'Post not found'];
+        }
+
         $post->update($data);
 
-        return $post;
+        if (! empty($data['tags'])) {
+            $tags = self::firstOrCreateTags($data['tags']);
+
+            $post->tags()->sync($tags);
+        }
+
+        return $post->toArray();
     }
 
     private static function createUniqueSlug($title): string

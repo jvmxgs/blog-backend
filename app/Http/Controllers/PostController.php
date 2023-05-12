@@ -53,7 +53,7 @@ class PostController extends Controller
 
         return response()->json([
             'data' => $post,
-        ]);
+        ], 201);
     }
 
     /**
@@ -67,8 +67,12 @@ class PostController extends Controller
     {
         $post = PostService::update($postId, $request->validated());
 
+        if (isset($post['error'])) {
+            return response()->json($post, 404);
+        }
+
         return response()->json([
             'data' => $post,
-        ]);
+        ], 200);
     }
 }
