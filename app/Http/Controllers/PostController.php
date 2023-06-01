@@ -33,8 +33,13 @@ class PostController extends BaseController
      */
     public function show($slug): JsonResponse
     {
-        $post = Post::where('slug', $slug)->first();
+        info(' dkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdk');
+        try {
+            $post = Post::where('slug', $slug)->firstOrFail();
 
-        return $this->successResponse('Post retrieved correctly', new PostResource($post));
+            return $this->successResponse('Post retrieved correctly', new PostResource($post));
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Post not found', 404);
+        }
     }
 }
