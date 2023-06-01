@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorePostRequest;
-use App\Http\Requests\UpdatePostRequest;
+use App\Http\Resources\PostCollection;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
-use App\Services\PostService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
-class PostController extends Controller
+class PostController extends BaseController
 {
     /**
      * List all posts
@@ -19,11 +16,14 @@ class PostController extends Controller
      */
     public function index(): JsonResponse
     {
-        $posts = Post::all();
+        $posts = Post::orderByDesc('updated_at')
+            ->with('tags')
+            ->paginate(15);
 
-        return response()->json([
-            'data' => $posts,
-        ]);
+        return $this->successResponseWithResourceCollection(
+            'Posts retrieved correctly',
+            new PostCollection($posts)
+        );
     }
 
     /**
@@ -35,44 +35,6 @@ class PostController extends Controller
     {
         $post = Post::where('slug', $slug)->first();
 
-        return response()->json([
-            'data' => $post,
-        ]);
-    }
-
-    /**
-     * Create a new post
-     *
-     * @param StorePostRequest $request
-     *
-     * @return JsonResponse
-     */
-    public function store(StorePostRequest $request): JsonResponse
-    {
-        $post = PostService::create($request->validated());
-
-        return response()->json([
-            'data' => $post,
-        ], 201);
-    }
-
-    /**
-     * Update a post
-     *
-     * @param UpdatePostRequest $request
-     *
-     * @return JsonResponse
-     */
-    public function update(UpdatePostRequest $request, $postId): JsonResponse
-    {
-        $post = PostService::update($postId, $request->validated());
-
-        if (isset($post['error'])) {
-            return response()->json($post, 404);
-        }
-
-        return response()->json([
-            'data' => $post,
-        ], 200);
+        return $this->successResponse('Post retrieved correctly', new PostResource($post));
     }
 }

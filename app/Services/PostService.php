@@ -10,7 +10,7 @@ class PostService
 {
     private static $slugRetry = 1;
 
-    public static function create($data): array
+    public static function create($data): Post
     {
         $data['slug'] = static::createUniqueSlug($data['title']);
 
@@ -22,15 +22,15 @@ class PostService
             $post->tags()->attach($tags);
         }
 
-        return $post->toArray();
+        return $post;
     }
 
-    public static function update($postId, $data): array
+    public static function update($postId, $data): Post
     {
         $post = Post::find($postId);
 
         if (!$post) {
-            return ['error' => 'Post not found'];
+            throw new \Exception('Post not found');
         }
 
         $post->update($data);
@@ -41,7 +41,7 @@ class PostService
             $post->tags()->sync($tags);
         }
 
-        return $post->toArray();
+        return $post;
     }
 
     private static function createUniqueSlug($title): string
@@ -64,6 +64,7 @@ class PostService
     {
         $countPosts = Post::query()
             ->where('slug', $slug)
+            ->withTrashed()
             ->count();
 
         return $countPosts > 0;
