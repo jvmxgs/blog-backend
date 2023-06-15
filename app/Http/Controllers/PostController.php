@@ -33,7 +33,6 @@ class PostController extends BaseController
      */
     public function show($slug): JsonResponse
     {
-        info(' dkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdkdk');
         try {
             $post = Post::where('slug', $slug)->firstOrFail();
 
