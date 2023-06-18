@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AuthenticationController extends Controller
+class AuthenticationController extends BaseController
 {
     /**
      * Handle an authentication attempt.
@@ -28,9 +28,7 @@ class AuthenticationController extends Controller
             ]);
         }
 
-        return response()->json([
-            'status' => 'error',
-        ]);
+        return $this->errorResponse(__('auth.failed'), 401);
     }
 
     /**
